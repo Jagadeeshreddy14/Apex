@@ -39,7 +39,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 // Configure axios base URL
-axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = 'https://apex-store-backend.onrender.com';
 
 const sortOptions=[
     {name:"Price: low to high",sort:"price",order:"asc"},
