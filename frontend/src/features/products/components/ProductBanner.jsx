@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper'; // Correct import for Swiper v9
+import { Autoplay } from 'swiper/modules';
 import MobileStepper from '@mui/material/MobileStepper';
 import { Box, useTheme } from '@mui/material';
 import { useState } from 'react';

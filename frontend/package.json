@@ -7,7 +7,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.14",
     "@mui/lab": "^5.0.0-alpha.152",
-   "@mui/material": "^5.16.14",
+    "@mui/material": "^5.16.14",
     "@reduxjs/toolkit": "^2.0.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -25,7 +25,7 @@
     "react-scripts": "5.0.1",
     "react-swiper": "^0.1.5",
     "react-toastify": "^9.1.3",
-    "swiper": "^9.4.1",
+    "swiper": "^11.2.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
