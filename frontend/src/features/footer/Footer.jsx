@@ -70,7 +70,7 @@ export const Footer = () => {
 
                         {/* QR Code */}
                         <Box width={'100px'} height={"100px"}>
-                            <img src={QRCodePng} height={'100%'} width={'100%'} style={{ objectFit: 'contain' }} alt="QR Code" />
+                            <img src="https://res-console.cloudinary.com/docnp0ctp/media_explorer_thumbnails/df09e17eb7dc9a816d7d5ce80f7ab7e3/detailed" height={'100%'} width={'100%'} style={{ objectFit: 'contain' }} alt="QR Code" />
                         </Box>
 
                         {/* App Store and Google Play Buttons */}

@@ -24,7 +24,7 @@ export const ProductBanner = ({ images }) => {
             <Swiper
                 modules={[Autoplay]}
                 autoplay={{
-                    delay: 5000,
+                    delay: 300,
                     disableOnInteraction: false,
                     pauseOnMouseEnter: true,
                 }}

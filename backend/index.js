@@ -23,9 +23,25 @@ const server=express()
 // database connection
 connectToDB()
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://apex-store-18j1.onrender.com'
+];
 
 // middlewares
-server.use(cors({origin:process.env.ORIGIN || 'http://localhost:3000',credentials:true,exposedHeaders:['X-Total-Count'],methods:['GET','POST','PATCH','DELETE']}))
+server.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['X-Total-Count']
+}));
 server.use(express.json())
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser())
@@ -49,7 +65,7 @@ server.use("/address",addressRoutes)
 server.use("/reviews",reviewRoutes)
 server.use("/wishlist",wishlistRoutes)
 server.use("/coupons", couponRoutes);
-
+server.use('/api/coupons', couponRoutes);
 
 server.get("/",(req,res)=>{
     res.status(200).json({message:'running'})

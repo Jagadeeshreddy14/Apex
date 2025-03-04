@@ -15,6 +15,7 @@ import {motion} from 'framer-motion'
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { formatPrice } from '../../../utils/formatPrice';
+import { validateCouponAsync, selectCouponDiscount, selectCouponError, selectDiscountAmount, selectTotalAmount, setTotalAmount, clearCoupon } from '../CheckoutSlice';
 
 export const Checkout = () => {
 
@@ -35,8 +36,10 @@ export const Checkout = () => {
     const is900=useMediaQuery(theme.breakpoints.down(900))
     const is480=useMediaQuery(theme.breakpoints.down(480))
     const [couponCode, setCouponCode] = useState('');
-    const [appliedCoupon, setAppliedCoupon] = useState(null);
-    const [couponError, setCouponError] = useState('');
+    const discount = useSelector(selectCouponDiscount);
+    const error = useSelector(selectCouponError);
+    const discountAmount = useSelector(selectDiscountAmount);
+    const totalAmount = useSelector(selectTotalAmount);
 
     const calculateDiscount = (coupon) => {
         if (!coupon || !orderTotal) return 0;
@@ -94,7 +97,7 @@ export const Checkout = () => {
           script.onload = () => {
             const options = {
               key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your test key
-              amount: (orderTotal + SHIPPING + TAXES) * 100, // Amount in paise
+              amount: finalTotal * 100, // Convert to paise
               currency: "INR",
               name: "Apex Store",
               description: "Order Payment",
@@ -140,43 +143,40 @@ export const Checkout = () => {
         }
       };
 
-      const handleApplyCoupon = async () => {
+    // Update the handleApplyCoupon function
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        
         try {
-          const response = await axios.post('/api/coupons/validate', {
-            code: couponCode,
-            cartTotal: orderTotal
-          });
-          
-          if (response.data.valid) {
-            setAppliedCoupon(response.data.coupon);
-            setCouponError('');
-            // Show success message
-            toast.success(`Coupon applied! You saved ₹${calculateDiscount(response.data.coupon)}`);
-          }
-        } catch (error) {
-          setCouponError(error.response?.data?.message || 'Invalid coupon');
-          setAppliedCoupon(null);
+            const result = await dispatch(validateCouponAsync({
+                code: couponCode.trim(),
+                cartTotal: orderTotal
+            })).unwrap();
+            
+            if (result) {
+                toast.success('Coupon applied successfully!');
+            }
+        } catch (err) {
+            toast.error(err || 'Could not apply coupon');
+            setCouponCode('');
         }
-      };
+    };
 
-      const validateCoupon = async (code) => {
-        try {
-          const response = await axios.post('/coupons/validate', {
-            code,
-            cartTotal: orderTotal // Use orderTotal instead of cart.total
-          });
-      
-          // Apply discount
-          if (response.data.valid) {
-            setAppliedCoupon(response.data.coupon); // Use setAppliedCoupon instead of setDiscount
-            toast.success('Coupon applied successfully!');
-          }
-        } catch (error) {
-          console.error('Coupon validation error:', error);
-          setAppliedCoupon(null); // Use setAppliedCoupon instead of setDiscount
-          toast.error(error.response?.data?.message || 'Invalid coupon code');
+    // Update the total calculations
+    useEffect(() => {
+        if (orderTotal) {
+            dispatch(setTotalAmount(orderTotal));
         }
-      };
+    }, [orderTotal, dispatch]);
+
+    // Clear coupon when component unmounts
+    useEffect(() => {
+        return () => {
+            dispatch(clearCoupon());
+        };
+    }, [dispatch]);
+
+    const finalTotal = orderTotal + SHIPPING + TAXES - (discountAmount || 0);
 
   return (
     <Stack flexDirection={'row'} p={2} rowGap={10} justifyContent={'center'} flexWrap={'wrap'} mb={'5rem'} mt={2} columnGap={4} alignItems={'flex-start'}>
@@ -306,8 +306,8 @@ export const Checkout = () => {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Enter coupon code"
-                    error={!!couponError}
-                    helperText={couponError}
+                    error={!!error}
+                    helperText={error}
                     />
                     <Button 
                     variant="outlined"
@@ -318,9 +318,15 @@ export const Checkout = () => {
                     </Button>
                 </Stack>
                 
-                {appliedCoupon && (
+                {discount && !error && (
                     <Alert severity="success">
-                    Coupon applied! You saved ₹{calculateDiscount(appliedCoupon)}
+                        Coupon applied! You saved ₹{discountAmount}
+                    </Alert>
+                )}
+
+                {error && (
+                    <Alert severity="error">
+                        {error}
                     </Alert>
                 )}
 
@@ -331,16 +337,16 @@ export const Checkout = () => {
                     <Typography>Subtotal</Typography>
                     <Typography>₹{orderTotal}</Typography>
                     </Stack>
-                    {appliedCoupon && (
+                    {discount && !error && (
                     <Stack direction="row" justifyContent="space-between" color="success.main">
                         <Typography>Coupon Discount</Typography>
-                        <Typography>-₹{calculateDiscount(appliedCoupon)}</Typography>
+                        <Typography>-₹{discountAmount}</Typography>
                     </Stack>
                     )}
                     <Stack direction="row" justifyContent="space-between">
                     <Typography>Final Total</Typography>
                     <Typography variant="h6">
-                        ₹{orderTotal - (appliedCoupon ? calculateDiscount(appliedCoupon) : 0)}
+                        ₹{formatPrice(finalTotal)}
                     </Typography>
                     </Stack>
                 </Stack>

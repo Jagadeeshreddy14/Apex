@@ -129,3 +129,22 @@ exports.validate = async (req, res) => {
     res.status(500).json({ message: 'Error validating coupon', error: error.message });
   }
 };
+
+exports.validateCoupon = async (req, res) => {
+  try {
+    const { code } = req.body;
+    const coupon = await Coupon.findOne({ code });
+
+    if (!coupon) {
+      return res.status(404).json({ message: "Coupon not found" });
+    }
+
+    if (coupon.expiryDate < Date.now()) {
+      return res.status(400).json({ message: "Coupon has expired" });
+    }
+
+    res.status(200).json({ discount: coupon.discount });
+  } catch (error) {
+    res.status(500).json({ message: "Error validating coupon" });
+  }
+};

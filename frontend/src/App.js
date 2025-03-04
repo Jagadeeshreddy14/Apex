@@ -15,7 +15,6 @@ import 'swiper/css/bundle';
 import 'swiper/css/autoplay';
 
 
-
 function App() {
 
   const isAuthChecked=useSelector(selectIsAuthChecked)
